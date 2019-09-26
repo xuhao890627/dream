@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.st.dream.sbmybatis.mapper.UserMapper">
+
+<resultMap id="userResult" type="com.st.dream.sbmybatis.model.User">
+    <id property="id" column="id"></id>
+    <result property="username" column="username"></result>
+    <result property="password" column="password"></result>
+    <collection property="propertyList" ofType="com.st.dream.sbmybatis.model.UserProperty">
+        <id property="id" column="b_id"></id>
+        <result property="userId" column="user_id"></result>
+        <result property="content" column="content"></result>
+    </collection>
+</resultMap>
+
+<select id="getUserByName" parameterType="String" resultType="com.st.dream.sbmybatis.model.User">
+        SELECT * FROM user WHERE username = #{name}
+    </select>
+
+<!-- 这边a表跟b表都有id， 必须要给b表指定个别名，不然collection中只会有一条记录,记得在上面的resultMap 做个匹配-->
+<select id="getUserWithProperty" resultMap="userResult">
+    select a.id, a.username, a.password, b.id b_id, b.user_id, b.content from user a, user_property b where a.id = b.user_id and a.id = #{id} and b.id in
+    <foreach collection="propertyIds" item="idxx" index="index" open="(" close=")" separator=",">#{idxx}</foreach>
+</select>
+
+    <insert id="insertUserXml" useGeneratedKeys="true" keyProperty="id">
+        insert into user(username, password) values (#{username}, #{password})
+    </insert>
+
+    <delete id="deletePropertyByIds">
+        delete from user_property where id in
+        <foreach collection="array" open="(" separator="," close=")" item="xxxx">
+            #{xxxx}
+        </foreach>
+    </delete>
+</mapper>
